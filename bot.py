@@ -24,15 +24,16 @@ def gen_markup():
     markup.add(KeyboardButton("Post"),
     KeyboardButton("Stories"),
     KeyboardButton("Profile Picture"),
-    KeyboardButton("Highlights")) #,
-    # KeyboardButton("All data from account"))
+    KeyboardButton("Highlights"),
+    KeyboardButton("IGTV"),
+    KeyboardButton("All data from account"))
     return markup
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     name = message.from_user.first_name
-    bot.send_message(message.chat.id, "Hi, " + name + ". I can download photos and videos from Instagram!", reply_markup=gen_markup())
+    bot.send_message(message.chat.id, "Hi, " + name + ". I can download photos and videos from Instagram! Choose what type of media you want to download and follow the instructions.", reply_markup=gen_markup())
 
 @bot.message_handler(func=lambda m:True)
 def main_menu(message):
@@ -48,11 +49,18 @@ def main_menu(message):
     elif message.text == 'Highlights':
         msg = bot.reply_to(message, "Send me the username")
         bot.register_next_step_handler(msg, download_highlights)
+    elif message.text == 'All data from account':
+        msg = bot.reply_to(message, "Send me the username")
+        bot.register_next_step_handler(msg, download_account)
+    elif message.text == 'IGTV':
+        msg = bot.reply_to(message, "Send me the username")
+        bot.register_next_step_handler(msg, download_igtv)
+    else:
+        bot.send_message(message.chat.id, "I don't understand you, sorry...")
 
 def download_post(message):
     url = message.text.split('/')
-    print_log()
-    print(url)
+    print_log(url)
     if 'https:' not in url or 'www.instagram.com' not in url:
         bot.send_message(message.chat.id, "Sorry, this is not a link!")
         print_log("Received not a link")
@@ -92,9 +100,15 @@ def download_stories(message):
         print_log("Downloaded all stories!")
         for im in os.listdir(username):
             if im.endswith(".jpg"):
-                photo = open(username+"/"+im, 'rb')
-                bot.send_photo(message.chat.id, photo)
-                print_log("Photo sent!")
+                name = im.split('.')
+                nm = name[0]
+                nm += ".mp4"
+                if nm in os.listdir(username):
+                    pass
+                else:
+                    photo = open(username+"/"+im, 'rb')
+                    bot.send_photo(message.chat.id, photo)
+                    print_log("Photo sent!")
             elif im.endswith(".mp4"):
                 video = open(username+'/'+im, 'rb')
                 bot.send_video(message.chat.id, video)
@@ -122,6 +136,10 @@ def download_profile_pic(message):
                 print_log("Photo sent!")
 
         shutil.rmtree(username, ignore_errors=True)
+        print("Deleted files "+username+"!")
+
+    else:
+        bot.send_message(message.chat.id, "Can't download profile picture!")
 
 def download_highlights(message):
     username = message.text
@@ -150,10 +168,84 @@ def download_highlights(message):
                 photo = open(username+"/"+im, 'rb')
                 bot.send_photo(message.chat.id, photo)
                 print_log("Photo sent!")
+            elif im.endswith(".mp4"):
+                video = open(username+'/'+im, 'rb')
+                bot.send_video(message.chat.id, video)
+                print_log("Video sent!")
 
         shutil.rmtree(username, ignore_errors=True)
+        print("Deleted files "+username+"!")
+
     else:
         bot.send_message(message.chat.id, "Can't download highlights!")
 
+def download_igtv(message):
+    username = message.text
+    username = username.replace("@", "")
+    print_log("Download igtv: " + username)
+    bot.send_message(message.chat.id, "Downloading IGTVs... Wait for message!")
+    profile = Profile.from_username(ig.context, username)
+    ig.download_igtv(profile, False, None)
+    if os.path.exists(username):
+        print_log("Downloaded igtv")
+        for im in os.listdir(username):
+            if im.endswith(".jpg"):
+                photo = open(username+"/"+im, 'rb')
+                bot.send_photo(message.chat.id, photo)
+                print_log("Photo sent!")
+            elif im.endswith(".mp4"):
+                video = open(username+'/'+im, 'rb')
+                bot.send_video(message.chat.id, video)
+                print_log("Video sent!")
+        
+        shutil.rmtree(username, ignore_errors=True)
+        print("Deleted files "+username+"!")
+
+    else:
+        bot.send_message(message.chat.id, "Can't download IGTV!")
+
+
+def download_account(message):
+    username = message.text
+    username = username.replace("@", "")
+    print_log("Download profile: " + username)
+    bot.send_message(message.chat.id ,"Downloading profile... Wait for message!")
+    profile = Profile.from_username(ig.context, username)
+    profiles = {profile}
+    ig.download_profiles(profiles, True, True, False, True, True, True, False, None, None, False)
+    if os.path.exists(username):
+        print_log("Profile downloaded")
+        for fl in os.listdir(username):
+            if os.path.isdir(username+'/'+fl):
+                bot.send_message(message.chat.id, fl+":")
+                for im in os.listdir(username+'/'+fl):
+                    print_log("Sending "+fl)
+                    if im.endswith(".jpg"):
+                        if im.endswith("cover.jpg"):
+                            bot.send_message(message.chat.id, "Cover of highlight:")
+                        photo = open(username+"/"+fl+'/'+im, 'rb')
+                        bot.send_photo(message.chat.id, photo)
+                        print_log("Photo sent!")
+                    elif im.endswith(".mp4"):
+                        video = open(username+'/'+fl+'/'+im, 'rb')
+                        bot.send_video(message.chat.id, video)
+                        print_log("Video sent!")
+
+        bot.send_message(message.chat.id, "Posts:")
+        for im in os.listdir(username):
+            if im.endswith(".jpg"):
+                photo = open(username+"/"+im, 'rb')
+                bot.send_photo(message.chat.id, photo)
+                print_log("Photo sent!")
+            elif im.endswith(".mp4"):
+                video = open(username+'/'+im, 'rb')
+                bot.send_video(message.chat.id, video)
+                print_log("Video sent!")
+
+        shutil.rmtree(username, ignore_errors=True)
+        print("Deleted files "+username+"!")
+
+    else:
+        bot.send_message(message.chat.id, "Can't download profile!")
 
 bot.polling(none_stop=True)
