@@ -9,9 +9,9 @@ from time import sleep
 from telebot.types import KeyboardButton, InlineKeyboardMarkup
 from helper import print_log
 
-TOKEN = "TOKEN"
+TOKEN = "1712589824:AAGEamtzwPC4FJQnYH67I8vlFaBW7WFL2LA"
 ig = instaloader.Instaloader()
-ig.login("LOGIN", "PASSWORD")
+ig.login("teddymint420", "teddyigtelegram43")
 
 print_log("Logged in! Ready to work!")
 
@@ -59,17 +59,23 @@ def main_menu(message):
         bot.send_message(message.chat.id, "I don't understand you, sorry...")
 
 def download_post(message):
+    print_log("Request from: "+message.from_user.username)
     url = message.text.split('/')
     print_log(url)
     if 'https:' not in url or 'www.instagram.com' not in url:
-        bot.send_message(message.chat.id, "Sorry, this is not a link!")
+        bot.send_message(message.chat.id, "Sorry, this is not a link to download!")
         print_log("Received not a link")
         return
     print(url[len(url)-2])
     ident = url[len(url)-2]
     bot.send_message(message.chat.id, "In progress... Wait for message!")
-    post = Post.from_shortcode(ig.context, ident)
-    d = ig.download_post(post, ident)
+    try:
+        post = Post.from_shortcode(ig.context, ident)
+        d = ig.download_post(post, ident)
+    except:
+        print("Error")
+        bot.send_message(message.chat.id, "Error! Can't download, verify if your message is correct or account is public.")
+    
     if d:
         for im in os.listdir(ident):
             if im.endswith(".jpg"):
@@ -89,13 +95,22 @@ def download_post(message):
 
 def download_stories(message):
     username = message.text
+    username = username.lower()
     username = username.replace("@", "")
+
+    print_log("Request from: "+message.from_user.username)
     print_log(username)
-    profile = Profile.from_username(ig.context, username)
-    list = [profile.userid]
-    print_log(profile.userid)
-    bot.send_message(message.chat.id, "Downloading stories... Wait for message!")
-    ig.download_stories(list, False, username, None)
+    
+    try:
+        profile = Profile.from_username(ig.context, username)
+        list = [profile.userid]
+        print_log(profile.userid)
+        bot.send_message(message.chat.id, "Downloading stories... Wait for message!")
+        ig.download_stories(list, False, username, None)
+    except:
+        print("Error")
+        bot.send_message(message.chat.id, "Error! Can't download, verify if your message is correct or account is public.")
+    
     if os.path.exists(username):
         print_log("Downloaded all stories!")
         for im in os.listdir(username):
@@ -121,12 +136,18 @@ def download_stories(message):
 
 def download_profile_pic(message):
     username = message.text
+    username = username.lower()
     username = username.replace("@", "")
+    print_log("Request from: "+message.from_user.username)
     print_log(username)
-    profile = Profile.from_username(ig.context, username)
-    print_log(username)
-    bot.send_message(message.chat.id, "Downloading profile picture... Wait for message!")
-    ig.download_profilepic(profile)
+    try:
+        profile = Profile.from_username(ig.context, username)
+        print_log(username)
+        bot.send_message(message.chat.id, "Downloading profile picture... Wait for message!")
+        ig.download_profilepic(profile)
+    except:
+        print_log("Error")
+        bot.send_message(message.chat.id, "Error! Can't download, verify if your message is correct or account is public.")
     if os.path.exists(username):
         print_log("Downloaded profile pic!")
         for im in os.listdir(username):
@@ -143,24 +164,32 @@ def download_profile_pic(message):
 
 def download_highlights(message):
     username = message.text
+    username = username.lower()
     username = username.replace("@", "")
+    print_log("Request from: "+message.from_user.username)
     print_log(username)
-    profile = Profile.from_username(ig.context, username)
-    it = ig.get_highlights(profile)
-    st = ""
-    y = 0
-    for x in it:
-        y += 1
-        st += str(y) + ". "
-        st += str(x)
-        st += '\n'
-    st = st.replace("<", "")
-    st = st.replace(">", "")
-    print_log(st)
-    bot.send_message(message.chat.id, "Avaliable highlights: \n" + st)
-    print_log("Downloading highlight "+username)
-    bot.send_message(message.chat.id, "Downloading highlights... Wait for message!")
-    d = ig.download_highlights(profile.userid, False, username, None)
+    try:
+
+        profile = Profile.from_username(ig.context, username)
+        it = ig.get_highlights(profile)
+        st = ""
+        y = 0
+        for x in it:
+            y += 1
+            st += str(y) + ". "
+            st += str(x)
+            st += '\n'
+        st = st.replace("<", "")
+        st = st.replace(">", "")
+        print_log(st)
+        bot.send_message(message.chat.id, "Avaliable highlights: \n" + st)
+        print_log("Downloading highlight "+username)
+        bot.send_message(message.chat.id, "Downloading highlights... Wait for message!")
+        d = ig.download_highlights(profile.userid, False, username, None)
+    except:
+        print_log("Error")
+        bot.send_message(message.chat.id, "Error! Can't download, verify if your message is correct or account is public.")
+    
     if os.path.exists(username):
         print_log("Downloaded highlights")
         for im in os.listdir(username):
@@ -181,11 +210,18 @@ def download_highlights(message):
 
 def download_igtv(message):
     username = message.text
+    username = username.lower()
     username = username.replace("@", "")
+    print_log("Request from: "+message.from_user.username)
     print_log("Download igtv: " + username)
-    bot.send_message(message.chat.id, "Downloading IGTVs... Wait for message!")
-    profile = Profile.from_username(ig.context, username)
-    ig.download_igtv(profile, False, None)
+    try:
+        bot.send_message(message.chat.id, "Downloading IGTVs... Wait for message!")
+        profile = Profile.from_username(ig.context, username)
+        ig.download_igtv(profile, False, None)
+    except:
+        print_log("Error")
+        bot.send_message(message.chat.id, "Error! Can't download, verify if your message is correct or account is public.")
+    
     if os.path.exists(username):
         print_log("Downloaded igtv")
         for im in os.listdir(username):
@@ -207,12 +243,19 @@ def download_igtv(message):
 
 def download_account(message):
     username = message.text
+    username = username.lower()
     username = username.replace("@", "")
-    print_log("Download profile: " + username)
-    bot.send_message(message.chat.id ,"Downloading profile... Wait for message!")
-    profile = Profile.from_username(ig.context, username)
-    profiles = {profile}
-    ig.download_profiles(profiles, True, True, False, True, True, True, False, None, None, False)
+    print_log("Request from: "+message.from_user.username)
+    try:
+        print_log("Download profile: " + username)
+        bot.send_message(message.chat.id ,"Downloading profile... Wait for message!")
+        profile = Profile.from_username(ig.context, username)
+        profiles = {profile}
+        ig.download_profiles(profiles, True, True, False, True, True, True, False, None, None, False)
+    except:
+        print_log("Error")
+        bot.send_message(message.chat.id, "Can't donwload, verify if your message is correct or account is public.")
+    
     if os.path.exists(username):
         print_log("Profile downloaded")
         for fl in os.listdir(username):
