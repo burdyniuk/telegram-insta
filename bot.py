@@ -9,9 +9,9 @@ from time import sleep
 from telebot.types import KeyboardButton, InlineKeyboardMarkup
 from helper import print_log
 
-TOKEN = "1712589824:AAGEamtzwPC4FJQnYH67I8vlFaBW7WFL2LA"
+TOKEN = "TOKEN"
 ig = instaloader.Instaloader()
-ig.login("teddymint420", "teddyigtelegram43")
+ig.login("LOGIN", "PASSWORD")
 
 print_log("Logged in! Ready to work!")
 
