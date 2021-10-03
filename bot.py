@@ -5,18 +5,41 @@ from instaloader import Post, Profile
 import os
 import shutil
 from time import sleep
+import flask
 
 from telebot.types import KeyboardButton, InlineKeyboardMarkup
 from helper import print_log
 
-TOKEN = "TOKEN"
+TOKEN = "1712589824:AAGEamtzwPC4FJQnYH67I8vlFaBW7WFL2LA"
 ig = instaloader.Instaloader()
-ig.login("LOGIN", "PASSWORD")
+ig.login("telegrambots_insta", "password0192")
 
 print_log("Logged in! Ready to work!")
 
+WEBHOOK_HOST = '80.249.144.141'
+WEBHOOK_PORT = 8443
+WEBHOOK_LISTEN = '80.249.144.141'
+
+WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
+WEBHOOK_URL_PATH = "/%s/" % (TOKEN)
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
+app = flask.Flask(__name__)
+
+#@app.route('/', methods=['GET', 'HEAD'])
+#def index():
+#    return ''
+
+#@app.route(WEBHOOK_URL_PATH, methods=['POST'])
+#def webhook():
+#    if flask.request.headers.get('content-type') == 'application/json':
+#        json_string = flask.request.get_data().decode('utf-8')
+#        update = telebot.types.Update.de_json(json_string)
+#        bot.process_new_updates([update])
+#        return ''
+#    else:
+#        flask.abort(403)
+
 
 def gen_markup():
     markup = types.ReplyKeyboardMarkup()
@@ -59,7 +82,7 @@ def main_menu(message):
         bot.send_message(message.chat.id, "I don't understand you, sorry...")
 
 def download_post(message):
-    print_log("Request from: "+message.from_user.username)
+    print_log("Request from: "+str(message.from_user.id))
     url = message.text.split('/')
     print_log(url)
     if 'https:' not in url or 'www.instagram.com' not in url:
@@ -98,7 +121,7 @@ def download_stories(message):
     username = username.lower()
     username = username.replace("@", "")
 
-    print_log("Request from: "+message.from_user.username)
+    print_log("Request from: "+str(message.from_user.id))
     print_log(username)
     
     try:
@@ -138,7 +161,7 @@ def download_profile_pic(message):
     username = message.text
     username = username.lower()
     username = username.replace("@", "")
-    print_log("Request from: "+message.from_user.username)
+    print_log("Request from: "+str(message.from_user.id))
     print_log(username)
     try:
         profile = Profile.from_username(ig.context, username)
@@ -166,7 +189,7 @@ def download_highlights(message):
     username = message.text
     username = username.lower()
     username = username.replace("@", "")
-    print_log("Request from: "+message.from_user.username)
+    print_log("Request from: "+str(message.from_user.id))
     print_log(username)
     try:
 
@@ -212,7 +235,7 @@ def download_igtv(message):
     username = message.text
     username = username.lower()
     username = username.replace("@", "")
-    print_log("Request from: "+message.from_user.username)
+    print_log("Request from: "+str(message.from_user.id))
     print_log("Download igtv: " + username)
     try:
         bot.send_message(message.chat.id, "Downloading IGTVs... Wait for message!")
@@ -245,7 +268,7 @@ def download_account(message):
     username = message.text
     username = username.lower()
     username = username.replace("@", "")
-    print_log("Request from: "+message.from_user.username)
+    print_log("Request from: "+str(message.from_user.id))
     try:
         print_log("Download profile: " + username)
         bot.send_message(message.chat.id ,"Downloading profile... Wait for message!")
@@ -290,5 +313,15 @@ def download_account(message):
 
     else:
         bot.send_message(message.chat.id, "Can't download profile!")
+
+bot.remove_webhook()
+
+#sleep(0.1)
+
+#bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
+
+#app.run(host=WEBHOOK_LISTEN,
+#        port=WEBHOOK_PORT,
+#        debug=True)
 
 bot.polling(none_stop=True)
