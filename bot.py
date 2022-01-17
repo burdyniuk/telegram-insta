@@ -10,15 +10,15 @@ import flask
 from telebot.types import KeyboardButton, InlineKeyboardMarkup
 from helper import print_log
 
-TOKEN = "1712589824:AAGEamtzwPC4FJQnYH67I8vlFaBW7WFL2LA"
+TOKEN = "TOKEN"
 ig = instaloader.Instaloader()
-ig.login("telegrambots_insta", "password0192")
+ig.login("LOGIN", "PASSWORD")
 
 print_log("Logged in! Ready to work!")
 
-WEBHOOK_HOST = '80.249.144.141'
+WEBHOOK_HOST = 'HOST'
 WEBHOOK_PORT = 8443
-WEBHOOK_LISTEN = '80.249.144.141'
+WEBHOOK_LISTEN = 'HOST'
 
 WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
 WEBHOOK_URL_PATH = "/%s/" % (TOKEN)
